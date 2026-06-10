@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizify - Ultimate Web Trivia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #090a0f;
+            --card: rgba(22, 24, 38, 0.8);
+            --border: rgba(255,255,255,0.06);
+            --primary: #8b5cf6;
+            --text: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+        body {
+            background-color: var(--bg); color: var(--text); min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+        .quiz-card {
+            width: 100%; max-width: 480px; background: var(--card); border: 1px solid var(--border);
+            border-radius: 28px; padding: 32px; backdrop-filter: blur(16px);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.5);
+        }
+        h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; text-align: center; background: linear-gradient(135deg, #c084fc, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p.subtitle { text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+        .progress-bar { height: 6px; width: 100%; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin-bottom: 24px; }
+        .progress-fill { height: 100%; width: 0%; background: var(--primary); transition: 0.3s; }
+        .question { font-size: 18px; font-weight: 600; margin-bottom: 24px; line-height: 1.5; }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option-btn {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px;
+            padding: 14px 16px; color: var(--text); text-align: left; font-size: 15px; cursor: pointer; transition: 0.2s;
+        }
+        .option-btn:hover { background: rgba(255,255,255,0.06); border-color: var(--primary); }
+        .results-view { text-align: center; }
+        .score-display { font-size: 48px; font-weight: 700; color: var(--primary); margin: 20px 0; }
+        .restart-btn {
+            background: var(--primary); color: white; border: none; border-radius: 12px;
+            padding: 14px 28px; font-weight: 600; cursor: pointer; transition: 0.3s;
+        }
+        .restart-btn:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="quiz-card">
+        <h1>Quizify</h1>
+        <p class="subtitle" id="quiz-sub">Interactive Web Trivia</p>
+        <div id="game-view">
+            <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+            <div class="question" id="question">Loading question...</div>
+            <div class="options" id="options"></div>
+        </div>
+        <div id="result-view" class="results-view" style="display: none;">
+            <h2>Quiz Completed!</h2>
+            <div class="score-display" id="score">0 / 0</div>
+            <p style="color:var(--text-muted); margin-bottom: 28px;" id="result-msg">Good job!</p>
+            <button class="restart-btn" onclick="startQuiz()">Restart Quiz</button>
+        </div>
+    </div>
+    <script>
+        const questions = [
+            { q: "Which programming language is known as the backbone of web pages?", a: ["JavaScript", "Python", "HTML", "C++"], correct: 2 },
+            { q: "What does CSS stand for?", a: ["Creative Style Sheets", "Cascading Style Sheets", "Computer Style Sheets", "Control Style Sheets"], correct: 1 },
+            { q: "Which database system uses collections and documents?", a: ["MySQL", "PostgreSQL", "SQLite", "MongoDB"], correct: 3 },
+            { q: "What year was JavaScript created?", a: ["1990", "1995", "2000", "2005"], correct: 1 }
+        ];
+
+        let curIndex = 0;
+        let score = 0;
+
+        function startQuiz() {
+            curIndex = 0;
+            score = 0;
+            document.getElementById('game-view').style.display = 'block';
+            document.getElementById('result-view').style.display = 'none';
+            document.getElementById('quiz-sub').style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const qObj = questions[curIndex];
+            document.getElementById('question').innerText = qObj.q;
+            document.getElementById('progress').style.width = `${(curIndex / questions.length) * 100}%`;
+            
+            const optsContainer = document.getElementById('options');
+            optsContainer.innerHTML = '';
+            qObj.a.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => selectOption(idx);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function selectOption(idx) {
+            if (idx === questions[curIndex].correct) score++;
+            curIndex++;
+            if (curIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('game-view').style.display = 'none';
+            document.getElementById('quiz-sub').style.display = 'none';
+            document.getElementById('result-view').style.display = 'block';
+            document.getElementById('score').innerText = `${score} / ${questions.length}`;
+            const pct = (score / questions.length) * 100;
+            let msg = pct >= 75 ? "Excellent! You are a master." : pct >= 50 ? "Decent! Keep practicing." : "Need practice. Try again!";
+            document.getElementById('result-msg').innerText = msg;
+        }
+
+        startQuiz();
+    </script>
+</body>
+</html>
